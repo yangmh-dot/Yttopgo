@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>全球寵物爆款雷達</title>
+    <title>全球寵物爆款雷達 (網頁版)</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -59,7 +59,6 @@
         .btn-success { background-color: #2ba640; color: #fff; }
         .icon { font-size: 1.2rem; }
         
-        /* 底部說明 */
         .tips {
             font-size: 0.8rem;
             color: #666;
@@ -67,24 +66,37 @@
             border-top: 1px solid #333;
             padding-top: 10px;
         }
+        
+        /* 新增切換開關樣式 */
+        .toggle-container {
+            text-align: center;
+            margin-bottom: 20px;
+            background: #2a2a2a;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .source-label {
+            font-size: 0.9rem;
+            color: #aaa;
+        }
     </style>
 </head>
 <body>
 
     <h1>🔥 全球寵物爆款雷達</h1>
-    <p>尋找模仿對象：不限分類、全球範圍</p>
+    <p>強制網頁清單模式，不開啟 App</p>
 
     <div class="card">
         <span class="card-title">🚀 混合搜尋 (貓 + 狗)</span>
-        <button class="btn-danger" onclick="searchYT('mix', 'day')">
+        <button class="btn-danger" onclick="searchWeb('mix', 'day')">
             <span>🔥 過去 24 小時 (最火)</span>
             <span class="icon">📅</span>
         </button>
-        <button class="btn-primary" onclick="searchYT('mix', 'week')">
+        <button class="btn-primary" onclick="searchWeb('mix', 'week')">
             <span>📈 過去 1 週 (穩定流量)</span>
             <span class="icon">🗓️</span>
         </button>
-        <button class="btn-success" onclick="searchYT('mix', 'shorts')">
+        <button class="btn-success" onclick="searchWeb('mix', 'shorts')">
             <span>📱 只看 Shorts (24h)</span>
             <span class="icon">⚡</span>
         </button>
@@ -92,67 +104,59 @@
 
     <div class="card">
         <span class="card-title">🐱 專注找貓 (Cats)</span>
-        <button class="btn-primary" style="background-color: #444; color: #fff;" onclick="searchYT('cat', 'day')">
+        <button class="btn-primary" style="background-color: #444; color: #fff;" onclick="searchWeb('cat', 'day')">
             過去 24 小時最熱門
         </button>
-        <button class="btn-primary" style="background-color: #444; color: #fff;" onclick="searchYT('cat', 'shorts')">
+        <button class="btn-primary" style="background-color: #444; color: #fff;" onclick="searchWeb('cat', 'shorts')">
             貓咪 Shorts
         </button>
     </div>
 
     <div class="card">
         <span class="card-title">🐶 專注找狗 (Dogs)</span>
-        <button class="btn-primary" style="background-color: #444; color: #fff;" onclick="searchYT('dog', 'day')">
+        <button class="btn-primary" style="background-color: #444; color: #fff;" onclick="searchWeb('dog', 'day')">
             過去 24 小時最熱門
         </button>
-        <button class="btn-primary" style="background-color: #444; color: #fff;" onclick="searchYT('dog', 'shorts')">
+        <button class="btn-primary" style="background-color: #444; color: #fff;" onclick="searchWeb('dog', 'shorts')">
             狗狗 Shorts
         </button>
     </div>
 
     <div class="tips">
-        <p><strong>搜尋邏輯：</strong>已自動包含 英、中、日、韓、西語關鍵字，並強制依「觀看次數」排序。</p>
-        <p><strong>模仿重點：</strong>觀察前 3 秒的運鏡、縮圖的對比度、以及使用的背景音樂。</p>
+        <p><strong>💡 提示：</strong>現在使用 Yewtu.be 搜尋，這是一個乾淨的 YouTube 網頁檢視器，不會跳轉到 App，方便您查看清單。</p>
     </div>
 
     <script>
-        function searchYT(type, timeFilter) {
-            // 1. 定義多語言關鍵字 (這就是繞過分類的關鍵)
-            // 包含：英文, 中文, 日文, 韓文, 西班牙文, 俄文, 印尼文
+        function searchWeb(type, timeFilter) {
+            // 1. 關鍵字邏輯不變
             const keywords = {
                 cat: '(cat OR cute kitten OR 猫 OR ねこ OR 고양이 OR gatito OR chat OR кот OR kucing)',
                 dog: '(dog OR puppy OR 犬 OR いぬ OR 강아지 OR perro OR chien OR собака OR anjing)',
                 mix: '(cat OR dog OR kitten OR puppy OR 猫 OR 犬 OR 고양이 OR 강아지 OR pets OR animals)'
             };
 
-            // 2. 取得基礎查詢字串
             let query = keywords[type] || keywords.mix;
+            
+            // 2. 設定 Invidious (Yewtu.be) 的搜尋參數
+            // 這是一個公開的 YouTube 前端，可以直接用網址參數控制排序
+            // sort_by: views (觀看數)
+            // date: today (今天) 或 week (本週)
+            
+            let params = "&sort_by=views"; // 預設依觀看數排序
 
-            // 3. 設定 YouTube 的過濾參數 (Magic Params)
-            // sp 參數是 YouTube 用來控制排序和過濾的編碼
-            // CAMSBAgCEgA%253D = Sort by View Count + Upload Date: Today (大約)
-            // CAMSAhAB = Sort by View Count + Type: Video
-            
-            let spParam = "";
-            
             if (timeFilter === 'day') {
-                // 過濾：上傳日期=今天, 排序=觀看次數
-                spParam = "&sp=CAMSBAgCEgA%253D"; 
+                params += "&date=today";
             } else if (timeFilter === 'week') {
-                // 過濾：上傳日期=本週, 排序=觀看次數
-                spParam = "&sp=CAMSAhAw";
+                params += "&date=week";
             } else if (timeFilter === 'shorts') {
-                // 手動增加 Shorts 關鍵字以提高精準度，因為單純用參數有時會跑掉
                 query += " #shorts";
-                // 過濾：上傳日期=今天, 排序=觀看次數
-                spParam = "&sp=CAMSBAgCEgA%253D";
+                params += "&date=today";
             }
 
-            // 4. 組合最終網址
-            // 使用 encodeURIComponent 確保特殊字元正確
-            const finalUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}${spParam}`;
+            // 3. 使用 yewtu.be 網域 (這是關鍵，它不會喚醒 YouTube App)
+            const finalUrl = `https://yewtu.be/search?q=${encodeURIComponent(query)}${params}`;
 
-            // 5. 開啟新視窗 (手機上通常會嘗試喚醒 App 或開瀏覽器)
+            // 4. 開啟網頁
             window.open(finalUrl, '_blank');
         }
     </script>
